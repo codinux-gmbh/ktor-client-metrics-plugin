@@ -1,13 +1,6 @@
 package net.codinux.web.ktor.client.metrics
 
-import io.ktor.client.network.sockets.*
-import io.ktor.client.plugins.*
 import io.ktor.client.plugins.api.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.util.*
-import net.codinux.web.ktor.client.metrics.MetricsPluginConfig.AppliedConfig
 
 class MetricsPluginConfig {
     lateinit var meterRegistry: MeterRegistry
@@ -28,63 +21,9 @@ class MetricsPluginConfig {
 
 val Metrics = createClientPlugin("Metrics", ::MetricsPluginConfig) {
 
-    val config = pluginConfig.applyConfig()
+    val metricsService = MetricsService(pluginConfig)
 
     on(Send) { request ->
-        try {
-            val context = config.meterRegistry.sendingRequest(request)
-            context?.let { request.attributes.put(contextAttributeKey, context) }
-
-            val originalCall = proceed(request)
-            stopTimerWithSuccessStatus(config, originalCall.response)
-
-            originalCall
-        } catch (e: Throwable) {
-            stopTimerWithErrorStatus(config, request, e)
-
-            throw e
-        }
+        metricsService.onSend(this, request)
     }
 }
-
-private val contextAttributeKey: AttributeKey<Any> = AttributeKey("MetricsContext")
-
-private fun stopTimerWithSuccessStatus(config: AppliedConfig, response: HttpResponse) {
-    val request = response.request
-    stopTimer(config, request.url, request.method, response.status.value, request.attributes)
-}
-
-private fun stopTimerWithErrorStatus(config: AppliedConfig, request: HttpRequestBuilder, cause: Throwable) {
-    val errorCode = when (cause) {
-        is HttpRequestTimeoutException,
-            is ConnectTimeoutException,
-            is SocketTimeoutException -> 504
-
-        else -> 500
-    }
-
-    stopTimer(config, request.url.build(), request.method, errorCode, request.attributes, cause)
-}
-
-private fun stopTimer(config: AppliedConfig, url: Url, method: HttpMethod, status: Int, attributes: Attributes, throwable: Throwable? = null) {
-    val parameters = mapOf(
-        "host" to url.host + (if (url.port == url.protocol.defaultPort) "" else ":${url.port}"), // only append port if it's not protocol default port
-        "uri" to (config.meterRegistry.getUriTag(url) ?: url.encodedPath),
-        "method" to method.value,
-        "status" to status.toString(),
-        "outcome" to (config.meterRegistry.calculateOutcome(status) ?: "n/a"),
-        "exception" to getExceptionClassName(throwable)
-    )
-
-    val tags = parameters
-    val context = attributes.getOrNull(contextAttributeKey)
-
-    config.meterRegistry.responseRetrieved(context, tags)
-}
-
-private fun getExceptionClassName(throwable: Throwable?) = throwable?.let {
-    val exceptionClass = throwable::class
-    // TODO: do not use forClass.qualifiedName on JS, it will produce an error
-    exceptionClass.simpleName.takeUnless { it.isNullOrBlank() } ?: exceptionClass.qualifiedName
-}
-    ?: "none"

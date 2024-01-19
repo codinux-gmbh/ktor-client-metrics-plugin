@@ -68,7 +68,7 @@ private fun stopTimerWithErrorStatus(config: AppliedConfig, request: HttpRequest
 
 private fun stopTimer(config: AppliedConfig, url: Url, method: HttpMethod, status: Int, attributes: Attributes, throwable: Throwable? = null) {
     val parameters = mapOf(
-        "host" to url.host,
+        "host" to url.host + (if (url.port == url.protocol.defaultPort) "" else ":${url.port}"), // only append port if it's not protocol default port
         "uri" to (config.meterRegistry.getUriTag(url) ?: url.encodedPath),
         "method" to method.value,
         "status" to status.toString(),

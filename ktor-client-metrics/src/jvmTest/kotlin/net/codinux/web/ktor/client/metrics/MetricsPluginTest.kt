@@ -32,13 +32,10 @@ class MetricsPluginTest {
 
         val metrics = prometheusRegistry.scrape()
 
+        assertDefaultMetrics(metrics)
         assertThat(metrics).all {
-            contains("""# HELP http_client_requests_seconds  
-# TYPE http_client_requests_seconds summary""")
             contains("""http_client_requests_seconds_count{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 1.0""")
             contains("""http_client_requests_seconds_sum{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
-            contains("""# HELP http_client_requests_seconds_max  
-# TYPE http_client_requests_seconds_max gauge""")
             contains("""http_client_requests_seconds_max{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""")
         }
     }
@@ -61,13 +58,10 @@ class MetricsPluginTest {
 
         val metrics = prometheusRegistry.scrape()
 
+        assertDefaultMetrics(metrics)
         assertThat(metrics).all {
-            contains("""# HELP http_client_requests_seconds  
-# TYPE http_client_requests_seconds summary""")
             contains("""http_client_requests_seconds_count{exception="none",host="example.com",method="POST",outcome="CLIENT_ERROR",status="400",uri="/user",} 1.0""")
             contains("""http_client_requests_seconds_sum{exception="none",host="example.com",method="POST",outcome="CLIENT_ERROR",status="400",uri="/user",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
-            contains("""# HELP http_client_requests_seconds_max  
-# TYPE http_client_requests_seconds_max gauge""")
             contains("""http_client_requests_seconds_max{exception="none",host="example.com",method="POST",outcome="CLIENT_ERROR",status="400",uri="/user",} 0.0""")
         }
     }
@@ -90,14 +84,25 @@ class MetricsPluginTest {
 
         val metrics = prometheusRegistry.scrape()
 
+        assertDefaultMetrics(metrics)
         assertThat(metrics).all {
-            contains("""# HELP http_client_requests_seconds  
-# TYPE http_client_requests_seconds summary""")
             contains("""http_client_requests_seconds_count{exception="none",host="example.com",method="PUT",outcome="SERVER_ERROR",status="503",uri="/user",} 1.0""")
             contains("""http_client_requests_seconds_sum{exception="none",host="example.com",method="PUT",outcome="SERVER_ERROR",status="503",uri="/user",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
-            contains("""# HELP http_client_requests_seconds_max  
-# TYPE http_client_requests_seconds_max gauge""")
             contains("""http_client_requests_seconds_max{exception="none",host="example.com",method="PUT",outcome="SERVER_ERROR",status="503",uri="/user",} 0.0""")
+        }
+    }
+
+    private fun assertDefaultMetrics(metrics: String) {
+        assertThat(metrics).all {
+            contains("# HELP http_client_requests_seconds")
+            contains("# TYPE http_client_requests_seconds summary")
+
+            contains("# HELP http_client_requests_seconds_max")
+            contains("# TYPE http_client_requests_seconds_max gauge")
+
+            contains("# HELP http_client_requests_active")
+            contains("# TYPE http_client_requests_active gauge")
+            contains("http_client_requests_active 0.0")
         }
     }
 }

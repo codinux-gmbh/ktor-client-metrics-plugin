@@ -14,6 +14,7 @@ import io.micrometer.core.instrument.Timer
 import io.micrometer.core.instrument.binder.http.Outcome
 import net.codinux.web.ktor.client.metrics.MetricsPluginConfig.AppliedConfig
 import java.net.URLDecoder
+import java.util.concurrent.atomic.AtomicInteger
 
 class MetricsPluginConfig {
     lateinit var meterRegistry: MeterRegistry
@@ -34,18 +35,22 @@ class MetricsPluginConfig {
 val Metrics = createClientPlugin("Metrics", ::MetricsPluginConfig) {
 
     val config = pluginConfig.applyConfig()
+    val active = config.meterRegistry.gauge("http.client.requests" + ".active", AtomicInteger(0))!!
 
     on(Send) { request ->
         try {
+            active.incrementAndGet()
             val sample = Timer.start(config.meterRegistry)
             request.attributes.put(sampleAttributeKey, sample)
 
             val originalCall = proceed(request)
             stopTimerWithSuccessStatus(config, originalCall.response)
+            active.decrementAndGet()
 
             originalCall
         } catch (e: Throwable) {
             stopTimerWithErrorStatus(config, request, e)
+            active.decrementAndGet()
 
             throw e
         }

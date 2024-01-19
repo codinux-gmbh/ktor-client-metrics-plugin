@@ -7,20 +7,14 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
-import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.Tag
-import io.micrometer.core.instrument.Tags
-import io.micrometer.core.instrument.Timer
-import io.micrometer.core.instrument.binder.http.Outcome
 import net.codinux.web.ktor.client.metrics.MetricsPluginConfig.AppliedConfig
-import java.net.URLDecoder
-import java.util.concurrent.atomic.AtomicInteger
 
 class MetricsPluginConfig {
     lateinit var meterRegistry: MeterRegistry
 
     data class AppliedConfig(
-        val meterRegistry: MeterRegistry
+        val meterRegistry: MeterRegistry,
+        val additionalAttributes: Map<String, String>
     )
 
     internal fun applyConfig(): AppliedConfig {
@@ -35,29 +29,25 @@ class MetricsPluginConfig {
 val Metrics = createClientPlugin("Metrics", ::MetricsPluginConfig) {
 
     val config = pluginConfig.applyConfig()
-    val active = config.meterRegistry.gauge("http.client.requests" + ".active", AtomicInteger(0))!!
 
     on(Send) { request ->
         try {
-            active.incrementAndGet()
-            val sample = Timer.start(config.meterRegistry)
-            request.attributes.put(sampleAttributeKey, sample)
+            val context = config.meterRegistry.sendingRequest(request)
+            context?.let { request.attributes.put(contextAttributeKey, context) }
 
             val originalCall = proceed(request)
             stopTimerWithSuccessStatus(config, originalCall.response)
-            active.decrementAndGet()
 
             originalCall
         } catch (e: Throwable) {
             stopTimerWithErrorStatus(config, request, e)
-            active.decrementAndGet()
 
             throw e
         }
     }
 }
 
-private val sampleAttributeKey: AttributeKey<Timer.Sample> = AttributeKey("TimerSample")
+private val contextAttributeKey: AttributeKey<Any> = AttributeKey("MetricsContext")
 
 private fun stopTimerWithSuccessStatus(config: AppliedConfig, response: HttpResponse) {
     val request = response.request
@@ -79,18 +69,18 @@ private fun stopTimerWithErrorStatus(config: AppliedConfig, request: HttpRequest
 private fun stopTimer(config: AppliedConfig, url: Url, method: HttpMethod, status: Int, attributes: Attributes, throwable: Throwable? = null) {
     val parameters = mapOf(
         "host" to url.host,
-        "uri" to URLDecoder.decode(url.encodedPath, Charsets.UTF_8),
+        "uri" to (config.meterRegistry.getUriTag(url) ?: url.encodedPath),
         "method" to method.value,
         "status" to status.toString(),
-        "outcome" to Outcome.forStatus(status).asKeyValue().value,
+        "outcome" to (config.meterRegistry.calculateOutcome(status) ?: "n/a"),
         "exception" to getExceptionClassName(throwable)
     )
 
     // From Spring source code: Make sure that KeyValues entries are already sorted by name for better performance
-    val tags = parameters.toSortedMap().map { Tag.of(it.key, it.value) }
-    val sample = attributes[sampleAttributeKey]
+    val tags = parameters.toSortedMap()
+    val context = attributes.getOrNull(contextAttributeKey)
 
-    sample.stop(config.meterRegistry.timer("http.client.requests", Tags.of(tags)))
+    config.meterRegistry.responseRetrieved(context, tags)
 }
 
 private fun getExceptionClassName(throwable: Throwable?) = throwable?.javaClass?.let { exceptionClass ->

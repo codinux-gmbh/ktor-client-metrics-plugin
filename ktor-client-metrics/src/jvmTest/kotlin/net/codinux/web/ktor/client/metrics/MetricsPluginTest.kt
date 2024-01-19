@@ -24,7 +24,7 @@ class MetricsPluginTest {
 
         val underTest = HttpClient(engine) {
             install(Metrics) {
-                this.meterRegistry = prometheusRegistry
+                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
             }
         }
 
@@ -50,7 +50,7 @@ class MetricsPluginTest {
 
         val underTest = HttpClient(engine) {
             install(Metrics) {
-                this.meterRegistry = prometheusRegistry
+                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
             }
         }
 
@@ -76,7 +76,7 @@ class MetricsPluginTest {
 
         val underTest = HttpClient(engine) {
             install(Metrics) {
-                this.meterRegistry = prometheusRegistry
+                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
             }
         }
 

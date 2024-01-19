@@ -12,24 +12,40 @@ import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.Tags
 import io.micrometer.core.instrument.Timer
 import io.micrometer.core.instrument.binder.http.Outcome
+import net.codinux.web.ktor.client.metrics.MetricsPluginConfig.AppliedConfig
 import java.net.URLDecoder
 
 class MetricsPluginConfig {
     lateinit var meterRegistry: MeterRegistry
+
+    data class AppliedConfig(
+        val meterRegistry: MeterRegistry
+    )
+
+    internal fun applyConfig(): AppliedConfig {
+        if (this::meterRegistry.isInitialized == false) {
+            throw IllegalArgumentException("meterRegistry must be set")
+        }
+
+        return AppliedConfig(meterRegistry)
+    }
 }
 
 val Metrics = createClientPlugin("Metrics", ::MetricsPluginConfig) {
+
+    val config = pluginConfig.applyConfig()
+
     on(Send) { request ->
         try {
-            val sample = Timer.start(pluginConfig.meterRegistry)
+            val sample = Timer.start(config.meterRegistry)
             request.attributes.put(sampleAttributeKey, sample)
 
             val originalCall = proceed(request)
-            stopTimerWithSuccessStatus(pluginConfig, originalCall.response)
+            stopTimerWithSuccessStatus(config, originalCall.response)
 
             originalCall
         } catch (e: Throwable) {
-            stopTimerWithErrorStatus(pluginConfig, request, e)
+            stopTimerWithErrorStatus(config, request, e)
 
             throw e
         }
@@ -38,12 +54,12 @@ val Metrics = createClientPlugin("Metrics", ::MetricsPluginConfig) {
 
 private val sampleAttributeKey: AttributeKey<Timer.Sample> = AttributeKey("TimerSample")
 
-private fun stopTimerWithSuccessStatus(config: MetricsPluginConfig, response: HttpResponse) {
+private fun stopTimerWithSuccessStatus(config: AppliedConfig, response: HttpResponse) {
     val request = response.request
     stopTimer(config, request.url, request.method, response.status.value, request.attributes)
 }
 
-private fun stopTimerWithErrorStatus(config: MetricsPluginConfig, request: HttpRequestBuilder, cause: Throwable) {
+private fun stopTimerWithErrorStatus(config: AppliedConfig, request: HttpRequestBuilder, cause: Throwable) {
     val errorCode = when (cause) {
         is HttpRequestTimeoutException,
             is ConnectTimeoutException,
@@ -55,7 +71,7 @@ private fun stopTimerWithErrorStatus(config: MetricsPluginConfig, request: HttpR
     stopTimer(config, request.url.build(), request.method, errorCode, request.attributes, cause)
 }
 
-private fun stopTimer(config: MetricsPluginConfig, url: Url, method: HttpMethod, status: Int, attributes: Attributes, throwable: Throwable? = null) {
+private fun stopTimer(config: AppliedConfig, url: Url, method: HttpMethod, status: Int, attributes: Attributes, throwable: Throwable? = null) {
     val parameters = mapOf(
         "host" to url.host,
         "uri" to URLDecoder.decode(url.encodedPath, Charsets.UTF_8),

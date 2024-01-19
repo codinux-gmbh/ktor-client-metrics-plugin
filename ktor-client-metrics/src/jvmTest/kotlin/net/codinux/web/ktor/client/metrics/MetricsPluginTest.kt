@@ -104,7 +104,7 @@ class MetricsPluginTest {
         val underTest = HttpClient(engine) {
             install(Metrics) {
                 this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
-                this.additionalAttributes = mapOf(
+                this.additionalTags = mapOf(
                     "component" to "Our important service"
                 )
             }
@@ -119,6 +119,33 @@ class MetricsPluginTest {
             contains("""http_client_requests_seconds_count{component="Our important service",exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 1.0""")
             contains("""http_client_requests_seconds_sum{component="Our important service",exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
             contains("""http_client_requests_seconds_max{component="Our important service",exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""")
+        }
+    }
+
+    @Test
+    fun `Adjust uriTag`() = runTest {
+        val prometheusRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+
+        val engine = MockEngine {
+            respondOk("Ok")
+        }
+
+        val underTest = HttpClient(engine) {
+            install(Metrics) {
+                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
+                this.getUriTag = { url -> url.encodedPathAndQuery }
+            }
+        }
+
+        underTest.get("https://example.com/user?name=Mahatma") { }
+
+        val metrics = prometheusRegistry.scrape()
+
+        assertDefaultMetrics(metrics)
+        assertThat(metrics).all {
+            contains("""http_client_requests_seconds_count{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} 1.0""")
+            contains("""http_client_requests_seconds_sum{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
+            contains("""http_client_requests_seconds_max{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} 0.0""")
         }
     }
 

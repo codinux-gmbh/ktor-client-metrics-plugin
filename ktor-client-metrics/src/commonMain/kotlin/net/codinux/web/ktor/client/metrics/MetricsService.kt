@@ -53,14 +53,14 @@ class MetricsService(
     private fun stopTimer(config: MetricsPluginConfig.AppliedConfig, url: Url, method: HttpMethod, status: Int, attributes: Attributes, throwable: Throwable? = null) {
         val standardTags = mapOf(
             "host" to url.host + (if (url.port == url.protocol.defaultPort) "" else ":${url.port}"), // only append port if it's not protocol default port
-            "uri" to (config.meterRegistry.getUriTag(url) ?: url.encodedPath),
+            "uri" to (config.getUriTag?.invoke(url) ?: config.meterRegistry.getUriTag(url) ?: url.encodedPath),
             "method" to method.value,
             "status" to status.toString(),
             "outcome" to (config.meterRegistry.calculateOutcome(status) ?: "n/a"),
             "exception" to getExceptionClassName(throwable)
         )
 
-        val tags = standardTags + config.additionalAttributes
+        val tags = standardTags + config.additionalTags
         val context = attributes.getOrNull(contextAttributeKey)
 
         config.meterRegistry.responseRetrieved(context, tags)

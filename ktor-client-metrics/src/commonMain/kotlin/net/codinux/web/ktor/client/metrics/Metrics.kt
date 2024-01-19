@@ -4,6 +4,7 @@ import io.ktor.client.plugins.api.*
 
 class MetricsPluginConfig {
     lateinit var meterRegistry: MeterRegistry
+    var additionalAttributes: Map<String, String> = emptyMap()
 
     data class AppliedConfig(
         val meterRegistry: MeterRegistry,
@@ -15,7 +16,7 @@ class MetricsPluginConfig {
             throw IllegalArgumentException("meterRegistry must be set")
         }
 
-        return AppliedConfig(meterRegistry)
+        return AppliedConfig(meterRegistry, additionalAttributes)
     }
 }
 

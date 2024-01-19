@@ -92,6 +92,37 @@ class MetricsPluginTest {
         }
     }
 
+
+    @Test
+    fun `Set additionalTags`() = runTest {
+        val prometheusRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+
+        val engine = MockEngine {
+            respondOk("Ok")
+        }
+
+        val underTest = HttpClient(engine) {
+            install(Metrics) {
+                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
+                this.additionalAttributes = mapOf(
+                    "component" to "Our important service"
+                )
+            }
+        }
+
+        underTest.get("https://example.com/user") { }
+
+        val metrics = prometheusRegistry.scrape()
+
+        assertDefaultMetrics(metrics)
+        assertThat(metrics).all {
+            contains("""http_client_requests_seconds_count{component="Our important service",exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 1.0""")
+            contains("""http_client_requests_seconds_sum{component="Our important service",exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
+            contains("""http_client_requests_seconds_max{component="Our important service",exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""")
+        }
+    }
+
+
     private fun assertDefaultMetrics(metrics: String) {
         assertThat(metrics).all {
             contains("# HELP http_client_requests_seconds")
@@ -102,6 +133,7 @@ class MetricsPluginTest {
 
             contains("# HELP http_client_requests_active")
             contains("# TYPE http_client_requests_active gauge")
+
             contains("http_client_requests_active 0.0")
         }
     }

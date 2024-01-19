@@ -1,12 +1,23 @@
-plugins {
-    // this is necessary to avoid the plugins to be loaded multiple times
-    // in each subproject's classloader
-    alias(libs.plugins.kotlinJvm) apply false
-    alias(libs.plugins.kotlinMultiplatform) apply false
+buildscript {
+    val kotlinVersion: String by extra
+    val atomicFUVersion: String by extra
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        classpath("org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicFUVersion")
+    }
 }
 
 
+
+
 allprojects {
+    group = "net.codinux.datastorage"
+    version = "1.0.0-SNAPSHOT"
+
     repositories {
         mavenCentral()
     }

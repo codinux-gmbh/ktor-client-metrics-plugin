@@ -9,11 +9,18 @@ import io.micrometer.core.instrument.binder.http.Outcome
 import java.net.URLDecoder
 import java.util.concurrent.atomic.AtomicInteger
 
-open class MicrometerMeterRegistry(
-    protected open val micrometerRegistry: io.micrometer.core.instrument.MeterRegistry
+class MicrometerMeterRegistry(
+    private val micrometerRegistry: io.micrometer.core.instrument.MeterRegistry,
+    private val metricName: String = "http.client.requests"
 ) : MeterRegistry {
 
-    protected open val active = micrometerRegistry.gauge("http.client.requests" + ".active", AtomicInteger(0))!!
+    init {
+        if (metricName.isBlank()) {
+            throw IllegalArgumentException("Metric name should be defined")
+        }
+    }
+
+    private val active = micrometerRegistry.gauge(metricName + ".active", AtomicInteger(0))!!
 
     override fun sendingRequest(request: HttpRequestBuilder): Timer.Sample {
         active.incrementAndGet()
@@ -25,7 +32,7 @@ open class MicrometerMeterRegistry(
         // From Spring source code: Make sure that KeyValues entries are already sorted by name for better performance
         val sortedTags = tags.toSortedMap().map { Tag.of(it.key, it.value) }
 
-        sample?.stop(micrometerRegistry.timer("http.client.requests", Tags.of(sortedTags)))
+        sample?.stop(micrometerRegistry.timer(metricName, Tags.of(sortedTags)))
 
         active.decrementAndGet()
     }

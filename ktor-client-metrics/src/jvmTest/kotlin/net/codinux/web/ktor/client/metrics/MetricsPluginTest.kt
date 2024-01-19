@@ -122,6 +122,33 @@ class MetricsPluginTest {
         }
     }
 
+    @Test
+    fun `Set metricName`() = runTest {
+        val prometheusRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+
+        val engine = MockEngine {
+            respondOk("Ok")
+        }
+
+        val underTest = HttpClient(engine) {
+            install(Metrics) {
+                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry, "ktor.client.requests")
+            }
+        }
+
+        underTest.get("https://example.com/user") { }
+
+        val metrics = prometheusRegistry.scrape()
+
+        assertThat(metrics).all {
+            contains("""ktor_client_requests_seconds_count{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 1.0""")
+            contains("""ktor_client_requests_seconds_sum{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
+            contains("""ktor_client_requests_seconds_max{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""")
+
+            contains("ktor_client_requests_active 0.0")
+        }
+    }
+
 
     private fun assertDefaultMetrics(metrics: String) {
         assertThat(metrics).all {

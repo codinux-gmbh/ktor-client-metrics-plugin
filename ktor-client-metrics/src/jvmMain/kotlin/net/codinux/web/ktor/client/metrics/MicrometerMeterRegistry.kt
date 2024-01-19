@@ -22,7 +22,10 @@ open class MicrometerMeterRegistry(
 
     override fun responseRetrieved(context: Any?, tags: Map<String, String>) {
         val sample = context as? Timer.Sample
-        sample?.stop(micrometerRegistry.timer("http.client.requests", Tags.of(tags.map { Tag.of(it.key, it.value) })))
+        // From Spring source code: Make sure that KeyValues entries are already sorted by name for better performance
+        val sortedTags = tags.toSortedMap().map { Tag.of(it.key, it.value) }
+
+        sample?.stop(micrometerRegistry.timer("http.client.requests", Tags.of(sortedTags)))
 
         active.decrementAndGet()
     }

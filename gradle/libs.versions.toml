@@ -13,6 +13,7 @@ assertk = "0.28.0"
 
 [libraries]
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 micrometer-core = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 
 # Tests

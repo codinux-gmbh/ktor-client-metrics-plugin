@@ -76,14 +76,15 @@ private fun stopTimer(config: AppliedConfig, url: Url, method: HttpMethod, statu
         "exception" to getExceptionClassName(throwable)
     )
 
-    // From Spring source code: Make sure that KeyValues entries are already sorted by name for better performance
-    val tags = parameters.toSortedMap()
+    val tags = parameters
     val context = attributes.getOrNull(contextAttributeKey)
 
     config.meterRegistry.responseRetrieved(context, tags)
 }
 
-private fun getExceptionClassName(throwable: Throwable?) = throwable?.javaClass?.let { exceptionClass ->
-    exceptionClass.simpleName.takeUnless { it.isNullOrBlank() } ?: exceptionClass.name
+private fun getExceptionClassName(throwable: Throwable?) = throwable?.let {
+    val exceptionClass = throwable::class
+    // TODO: do not use forClass.qualifiedName on JS, it will produce an error
+    exceptionClass.simpleName.takeUnless { it.isNullOrBlank() } ?: exceptionClass.qualifiedName
 }
     ?: "none"

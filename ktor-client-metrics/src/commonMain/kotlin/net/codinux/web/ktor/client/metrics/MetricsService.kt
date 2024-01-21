@@ -6,8 +6,8 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.api.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import io.ktor.http.*
 import io.ktor.util.*
+import io.ktor.util.date.*
 
 class MetricsService(
     pluginConfig: MetricsPluginConfig
@@ -18,6 +18,8 @@ class MetricsService(
     private val contextAttributeKey: AttributeKey<Any> = AttributeKey("MetricsContext")
 
     suspend fun onSend(sender: Send.Sender, request: HttpRequestBuilder): HttpClientCall {
+        val requestTime = GMTDate()
+
         return try {
             val context = config.meterRegistry.startingRequest(request)
             context?.let { request.attributes.put(contextAttributeKey, context) }
@@ -27,7 +29,7 @@ class MetricsService(
 
             originalCall
         } catch (e: Throwable) {
-            stopTimerWithErrorStatus(config, request, e)
+            stopTimerWithErrorStatus(config, request, requestTime, e)
 
             throw e
         }
@@ -35,10 +37,12 @@ class MetricsService(
 
     private fun stopTimerWithSuccessStatus(config: MetricsPluginConfig.AppliedConfig, response: HttpResponse) {
         val request = response.request
-        stopTimer(config, ResponseData(request.method, request.url, response.status.value, request.attributes))
+        val responseData = ResponseData(request.method, request.url, response.status.value, request.attributes, response.requestTime, response.responseTime)
+
+        stopTimer(config, responseData)
     }
 
-    private fun stopTimerWithErrorStatus(config: MetricsPluginConfig.AppliedConfig, request: HttpRequestBuilder, cause: Throwable) {
+    private fun stopTimerWithErrorStatus(config: MetricsPluginConfig.AppliedConfig, request: HttpRequestBuilder, requestTime: GMTDate, cause: Throwable) {
         val errorCode = when (cause) {
             is HttpRequestTimeoutException,
             is ConnectTimeoutException,
@@ -47,7 +51,9 @@ class MetricsService(
             else -> 500
         }
 
-        stopTimer(config, ResponseData(request.method, request.url.build(), errorCode, request.attributes, cause))
+        val responseData = ResponseData(request.method, request.url.build(), errorCode, request.attributes, requestTime, GMTDate(), cause)
+
+        stopTimer(config, responseData)
     }
 
     private fun stopTimer(config: MetricsPluginConfig.AppliedConfig, responseData: ResponseData) {

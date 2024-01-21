@@ -35,8 +35,8 @@ class MetricsPluginTest {
         assertDefaultMetrics(metrics)
         assertThat(metrics).all {
             contains("""http_client_requests_seconds_count{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 1.0""")
-            contains("""http_client_requests_seconds_sum{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
-            contains("""http_client_requests_seconds_max{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""")
+            contains("""http_client_requests_seconds_sum{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} """)
+            contains("""http_client_requests_seconds_max{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} """)
         }
     }
 
@@ -61,8 +61,8 @@ class MetricsPluginTest {
         assertDefaultMetrics(metrics)
         assertThat(metrics).all {
             contains("""http_client_requests_seconds_count{exception="none",host="example.com",method="POST",outcome="CLIENT_ERROR",status="400",uri="/user",} 1.0""")
-            contains("""http_client_requests_seconds_sum{exception="none",host="example.com",method="POST",outcome="CLIENT_ERROR",status="400",uri="/user",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
-            contains("""http_client_requests_seconds_max{exception="none",host="example.com",method="POST",outcome="CLIENT_ERROR",status="400",uri="/user",} 0.0""")
+            contains("""http_client_requests_seconds_sum{exception="none",host="example.com",method="POST",outcome="CLIENT_ERROR",status="400",uri="/user",} """)
+            contains("""http_client_requests_seconds_max{exception="none",host="example.com",method="POST",outcome="CLIENT_ERROR",status="400",uri="/user",} """)
         }
     }
 
@@ -87,8 +87,8 @@ class MetricsPluginTest {
         assertDefaultMetrics(metrics)
         assertThat(metrics).all {
             contains("""http_client_requests_seconds_count{exception="none",host="example.com",method="PUT",outcome="SERVER_ERROR",status="503",uri="/user",} 1.0""")
-            contains("""http_client_requests_seconds_sum{exception="none",host="example.com",method="PUT",outcome="SERVER_ERROR",status="503",uri="/user",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
-            contains("""http_client_requests_seconds_max{exception="none",host="example.com",method="PUT",outcome="SERVER_ERROR",status="503",uri="/user",} 0.0""")
+            contains("""http_client_requests_seconds_sum{exception="none",host="example.com",method="PUT",outcome="SERVER_ERROR",status="503",uri="/user",} """)
+            contains("""http_client_requests_seconds_max{exception="none",host="example.com",method="PUT",outcome="SERVER_ERROR",status="503",uri="/user",} """)
         }
     }
 
@@ -117,8 +117,8 @@ class MetricsPluginTest {
         assertDefaultMetrics(metrics)
         assertThat(metrics).all {
             contains("""http_client_requests_seconds_count{component="Our important service",exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 1.0""")
-            contains("""http_client_requests_seconds_sum{component="Our important service",exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
-            contains("""http_client_requests_seconds_max{component="Our important service",exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""")
+            contains("""http_client_requests_seconds_sum{component="Our important service",exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} """)
+            contains("""http_client_requests_seconds_max{component="Our important service",exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} """)
         }
     }
 
@@ -144,8 +144,8 @@ class MetricsPluginTest {
         assertDefaultMetrics(metrics)
         assertThat(metrics).all {
             contains("""http_client_requests_seconds_count{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} 1.0""")
-            contains("""http_client_requests_seconds_sum{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
-            contains("""http_client_requests_seconds_max{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} 0.0""")
+            contains("""http_client_requests_seconds_sum{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} """)
+            contains("""http_client_requests_seconds_max{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} """)
         }
     }
 
@@ -175,8 +175,8 @@ class MetricsPluginTest {
         assertDefaultMetrics(metrics)
         assertThat(metrics).all {
             contains("""http_client_requests_seconds_count{error_message="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} 1.0""")
-            contains("""http_client_requests_seconds_sum{error_message="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
-            contains("""http_client_requests_seconds_max{error_message="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} 0.0""")
+            contains("""http_client_requests_seconds_sum{error_message="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} """)
+            contains("""http_client_requests_seconds_max{error_message="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} """)
         }
     }
 
@@ -200,8 +200,8 @@ class MetricsPluginTest {
 
         assertThat(metrics).all {
             contains("""ktor_client_requests_seconds_count{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 1.0""")
-            contains("""ktor_client_requests_seconds_sum{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
-            contains("""ktor_client_requests_seconds_max{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} 0.0""")
+            contains("""ktor_client_requests_seconds_sum{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} """)
+            contains("""ktor_client_requests_seconds_max{exception="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user",} """)
 
             contains("ktor_client_requests_active 0.0")
         }

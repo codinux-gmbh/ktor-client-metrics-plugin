@@ -44,14 +44,5 @@ kotlin {
 
             implementation(libs.assertk)
         }
-
-        jvmMain {
-            dependencies {
-                implementation(libs.micrometer.core)
-            }
-        }
-        jvmTest.dependencies {
-            implementation(libs.micrometer.registry.prometheus)
-        }
     }
 }

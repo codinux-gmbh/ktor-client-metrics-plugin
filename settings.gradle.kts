@@ -7,3 +7,4 @@ rootProject.name = "ktor-client-metrics-plugin"
 
 
 include("ktor-client-metrics")
+include("ktor-client-metrics-micrometer")

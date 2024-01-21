@@ -15,7 +15,7 @@ buildscript {
 
 
 allprojects {
-    group = "net.codinux.datastorage"
+    group = "net.codinux.web"
     version = "1.0.0-SNAPSHOT"
 
     repositories {

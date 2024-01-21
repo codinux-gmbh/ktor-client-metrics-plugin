@@ -1,13 +1,12 @@
 package net.codinux.web.micrometer.okhttp
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.binder.okhttp3.OkHttpMetricsEventListener
+import net.codinux.web.micrometer.common.JacksonObjectMapper
 import net.codinux.web.micrometer.model.Joke
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okio.use
 
 class OkHttpJokeRepository(
     meterRegistry: MeterRegistry
@@ -21,14 +20,12 @@ class OkHttpJokeRepository(
         .url("https://v2.jokeapi.dev/joke/Programming?blacklistFlags=racist,sexist")
         .build()
 
-    private val objectMapper = ObjectMapper()
-        .registerModules(KotlinModule.Builder().build())
-        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-
     fun getJoke(): Joke? = client.newCall(request).execute().let { response ->
-        val joke = response.body?.string()?.let { objectMapper.readValue(it, Joke::class.java) }
-        response.close()
-        joke
+        response.use {
+            response.body?.string()?.let {
+                JacksonObjectMapper.deserializeJoke(it)
+            }
+        }
     }
 
 }

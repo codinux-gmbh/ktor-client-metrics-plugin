@@ -50,3 +50,15 @@ OkHttpClient_seconds_sum{host="v2.jokeapi.dev",method="GET",outcome="SUCCESS",st
 # TYPE OkHttpClient_seconds_max gauge
 OkHttpClient_seconds_max{host="v2.jokeapi.dev",method="GET",outcome="SUCCESS",status="200",target_host="v2.jokeapi.dev",target_port="443",target_scheme="https",uri="none",} 0.357936119
 ```
+
+### Java HttpClient
+
+```text
+# HELP http_client_requests_seconds Timer for JDK's HttpClient
+# TYPE http_client_requests_seconds summary
+http_client_requests_seconds_count{method="GET",outcome="SUCCESS",status="200",uri="UNKNOWN",} 1.0
+http_client_requests_seconds_sum{method="GET",outcome="SUCCESS",status="200",uri="UNKNOWN",} 0.25779498
+# HELP http_client_requests_seconds_max Timer for JDK's HttpClient
+# TYPE http_client_requests_seconds_max gauge
+http_client_requests_seconds_max{method="GET",outcome="SUCCESS",status="200",uri="UNKNOWN",} 0.25779498
+```

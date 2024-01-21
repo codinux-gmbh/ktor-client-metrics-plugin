@@ -35,7 +35,7 @@ class MetricsService(
 
     private fun stopTimerWithSuccessStatus(config: MetricsPluginConfig.AppliedConfig, response: HttpResponse) {
         val request = response.request
-        stopTimer(config, request.url, request.method, response.status.value, request.attributes)
+        stopTimer(config, ResponseData(request.method, request.url, response.status.value, request.attributes))
     }
 
     private fun stopTimerWithErrorStatus(config: MetricsPluginConfig.AppliedConfig, request: HttpRequestBuilder, cause: Throwable) {
@@ -47,24 +47,26 @@ class MetricsService(
             else -> 500
         }
 
-        stopTimer(config, request.url.build(), request.method, errorCode, request.attributes, cause)
+        stopTimer(config, ResponseData(request.method, request.url.build(), errorCode, request.attributes, cause))
     }
 
-    private fun stopTimer(config: MetricsPluginConfig.AppliedConfig, url: Url, method: HttpMethod, status: Int, attributes: Attributes, throwable: Throwable? = null) {
+    private fun stopTimer(config: MetricsPluginConfig.AppliedConfig, responseData: ResponseData) {
+        val url = responseData.url
+
         val standardTags = mutableMapOf(
             "host" to url.host + (if (url.port == url.protocol.defaultPort) "" else ":${url.port}"), // only append port if it's not protocol default port
             "uri" to (config.getUriTag?.invoke(url) ?: config.meterRegistry.getUriTag(url) ?: url.encodedPath),
-            "method" to method.value,
-            "status" to status.toString(),
-            "outcome" to (config.meterRegistry.calculateOutcome(status) ?: "n/a"),
-            "exception" to getExceptionClassName(throwable)
+            "method" to responseData.method.value,
+            "status" to responseData.httpStatusCode.toString(),
+            "outcome" to (config.meterRegistry.calculateOutcome(responseData.httpStatusCode) ?: "n/a"),
+            "exception" to getExceptionClassName(responseData.exception)
         )
 
-        config.configureTags?.invoke(standardTags, method, url, status, attributes, throwable)
+        config.configureTags?.invoke(standardTags, responseData)
         val tags = standardTags + config.additionalTags
-        val context = attributes.getOrNull(contextAttributeKey)
+        val context = responseData.attributes.getOrNull(contextAttributeKey)
 
-        config.meterRegistry.responseRetrieved(context, tags)
+        config.meterRegistry.responseRetrieved(context, responseData, tags)
     }
 
     private fun getExceptionClassName(throwable: Throwable?) = throwable?.let {

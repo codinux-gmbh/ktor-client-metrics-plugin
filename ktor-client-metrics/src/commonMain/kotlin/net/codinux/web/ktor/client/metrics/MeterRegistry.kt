@@ -7,7 +7,7 @@ interface MeterRegistry { // cannot make interface generic as otherwise create c
 
     fun startingRequest(request: HttpRequestBuilder): Any?
 
-    fun responseRetrieved(context: Any?, tags: Map<String, String>)
+    fun responseRetrieved(context: Any?, response: ResponseData, tags: Map<String, String>)
 
     fun getUriTag(url: Url): String? = null
 

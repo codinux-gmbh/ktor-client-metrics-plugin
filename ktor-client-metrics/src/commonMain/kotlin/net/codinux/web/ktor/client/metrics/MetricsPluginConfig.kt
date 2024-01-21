@@ -17,13 +17,13 @@ class MetricsPluginConfig {
      */
     var getUriTag: ((Url) -> String?)? = null
 
-    var configureTags: ((standardTags: MutableMap<String, String>, HttpMethod, Url, status: Int, Attributes, exception: Throwable?) -> Unit)? = null
+    var configureTags: ((standardTags: MutableMap<String, String>, response: ResponseData) -> Unit)? = null
 
     data class AppliedConfig(
         val meterRegistry: MeterRegistry,
         val additionalTags: Map<String, String>,
         val getUriTag: ((Url) -> String?)?,
-        val configureTags: ((standardTags: MutableMap<String, String>, HttpMethod, Url, status: Int, Attributes, exception: Throwable?) -> Unit)?
+        val configureTags: ((standardTags: MutableMap<String, String>, response: ResponseData) -> Unit)?
     )
 
     internal fun applyConfig(): AppliedConfig {

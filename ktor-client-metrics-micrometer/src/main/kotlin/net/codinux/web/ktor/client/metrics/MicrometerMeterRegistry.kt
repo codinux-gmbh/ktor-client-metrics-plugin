@@ -27,7 +27,7 @@ class MicrometerMeterRegistry(
         return Timer.start(micrometerRegistry)
     }
 
-    override fun responseRetrieved(context: Any?, tags: Map<String, String>) {
+    override fun responseRetrieved(context: Any?, response: ResponseData, tags: Map<String, String>) {
         val sample = context as? Timer.Sample
         // From Spring source code: Make sure that KeyValues entries are already sorted by name for better performance
         val sortedTags = tags.toSortedMap().map { Tag.of(it.key, it.value) }

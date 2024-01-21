@@ -5,7 +5,7 @@ import io.ktor.http.*
 
 interface MeterRegistry { // cannot make interface generic as otherwise create config object with ::MetricsPluginConfig wouldn't work anymore
 
-    fun sendingRequest(request: HttpRequestBuilder): Any?
+    fun startingRequest(request: HttpRequestBuilder): Any?
 
     fun responseRetrieved(context: Any?, tags: Map<String, String>)
 

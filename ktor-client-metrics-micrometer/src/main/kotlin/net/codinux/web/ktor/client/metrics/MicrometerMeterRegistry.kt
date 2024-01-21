@@ -22,7 +22,7 @@ class MicrometerMeterRegistry(
 
     private val active = micrometerRegistry.gauge(metricName + ".active", AtomicInteger(0))!!
 
-    override fun sendingRequest(request: HttpRequestBuilder): Timer.Sample {
+    override fun startingRequest(request: HttpRequestBuilder): Timer.Sample {
         active.incrementAndGet()
         return Timer.start(micrometerRegistry)
     }

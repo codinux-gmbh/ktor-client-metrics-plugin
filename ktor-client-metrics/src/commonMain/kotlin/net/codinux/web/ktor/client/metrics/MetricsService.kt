@@ -19,7 +19,7 @@ class MetricsService(
 
     suspend fun onSend(sender: Send.Sender, request: HttpRequestBuilder): HttpClientCall {
         return try {
-            val context = config.meterRegistry.sendingRequest(request)
+            val context = config.meterRegistry.startingRequest(request)
             context?.let { request.attributes.put(contextAttributeKey, context) }
 
             val originalCall = sender.proceed(request)

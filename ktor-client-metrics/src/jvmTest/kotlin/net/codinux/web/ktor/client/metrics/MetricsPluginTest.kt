@@ -150,6 +150,37 @@ class MetricsPluginTest {
     }
 
     @Test
+    fun `Configure tags`() = runTest {
+        val prometheusRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+
+        val engine = MockEngine {
+            respondOk("Ok")
+        }
+
+        val underTest = HttpClient(engine) {
+            install(Metrics) {
+                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
+                this.configureTags = { standardTags, method, url, status, attributes, throwable ->
+                    standardTags["uri"] = url.encodedPathAndQuery
+                    standardTags.remove("exception")
+                    standardTags["error-message"] = throwable?.message ?: "none"
+                }
+            }
+        }
+
+        underTest.get("https://example.com/user?name=Mahatma") { }
+
+        val metrics = prometheusRegistry.scrape()
+
+        assertDefaultMetrics(metrics)
+        assertThat(metrics).all {
+            contains("""http_client_requests_seconds_count{error_message="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} 1.0""")
+            contains("""http_client_requests_seconds_sum{error_message="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} 0.0""") // maybe that the sum should start with '0.0' is too hard, may remove '0.0
+            contains("""http_client_requests_seconds_max{error_message="none",host="example.com",method="GET",outcome="SUCCESS",status="200",uri="/user?name=Mahatma",} 0.0""")
+        }
+    }
+
+    @Test
     fun `Set metricName`() = runTest {
         val prometheusRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 

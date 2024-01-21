@@ -2,6 +2,7 @@ package net.codinux.web.ktor.client.metrics
 
 import io.ktor.client.plugins.api.*
 import io.ktor.http.*
+import io.ktor.util.*
 
 class MetricsPluginConfig {
     lateinit var meterRegistry: MeterRegistry
@@ -17,10 +18,13 @@ class MetricsPluginConfig {
      */
     var getUriTag: ((Url) -> String?)? = null
 
+    var configureTags: ((standardTags: MutableMap<String, String>, HttpMethod, Url, status: Int, Attributes, throwable: Throwable?) -> Unit)? = null
+
     data class AppliedConfig(
         val meterRegistry: MeterRegistry,
         val additionalTags: Map<String, String>,
-        val getUriTag: ((Url) -> String?)?
+        val getUriTag: ((Url) -> String?)?,
+        val configureTags: ((standardTags: MutableMap<String, String>, HttpMethod, Url, status: Int, Attributes, throwable: Throwable?) -> Unit)?
     )
 
     internal fun applyConfig(): AppliedConfig {
@@ -28,7 +32,7 @@ class MetricsPluginConfig {
             throw IllegalArgumentException("meterRegistry must be set")
         }
 
-        return AppliedConfig(meterRegistry, additionalTags, getUriTag)
+        return AppliedConfig(meterRegistry, additionalTags, getUriTag, configureTags)
     }
 }
 

@@ -51,7 +51,7 @@ class MetricsService(
     }
 
     private fun stopTimer(config: MetricsPluginConfig.AppliedConfig, url: Url, method: HttpMethod, status: Int, attributes: Attributes, throwable: Throwable? = null) {
-        val standardTags = mapOf(
+        val standardTags = mutableMapOf(
             "host" to url.host + (if (url.port == url.protocol.defaultPort) "" else ":${url.port}"), // only append port if it's not protocol default port
             "uri" to (config.getUriTag?.invoke(url) ?: config.meterRegistry.getUriTag(url) ?: url.encodedPath),
             "method" to method.value,
@@ -60,6 +60,7 @@ class MetricsService(
             "exception" to getExceptionClassName(throwable)
         )
 
+        config.configureTags?.invoke(standardTags, method, url, status, attributes, throwable)
         val tags = standardTags + config.additionalTags
         val context = attributes.getOrNull(contextAttributeKey)
 

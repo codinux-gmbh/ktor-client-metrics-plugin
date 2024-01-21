@@ -35,3 +35,18 @@ http_client_requests_active_seconds_duration_sum{client_name="v2.jokeapi.dev",ex
 # TYPE http_client_requests_active_seconds_max gauge
 http_client_requests_active_seconds_max{client_name="v2.jokeapi.dev",exception="none",method="GET",outcome="UNKNOWN",status="CLIENT_ERROR",uri="none",} 0.0
 ```
+
+
+## Micrometer
+
+### OkHttp
+
+```text
+# HELP OkHttpClient_seconds Timer of OkHttp operation
+# TYPE OkHttpClient_seconds summary
+OkHttpClient_seconds_count{host="v2.jokeapi.dev",method="GET",outcome="SUCCESS",status="200",target_host="v2.jokeapi.dev",target_port="443",target_scheme="https",uri="none",} 1.0
+OkHttpClient_seconds_sum{host="v2.jokeapi.dev",method="GET",outcome="SUCCESS",status="200",target_host="v2.jokeapi.dev",target_port="443",target_scheme="https",uri="none",} 0.357936119
+# HELP OkHttpClient_seconds_max Timer of OkHttp operation
+# TYPE OkHttpClient_seconds_max gauge
+OkHttpClient_seconds_max{host="v2.jokeapi.dev",method="GET",outcome="SUCCESS",status="200",target_host="v2.jokeapi.dev",target_port="443",target_scheme="https",uri="none",} 0.357936119
+```

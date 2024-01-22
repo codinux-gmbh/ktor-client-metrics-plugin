@@ -25,7 +25,9 @@ class ApacheHttpClient5JokeRepository(
         .addExecInterceptorLast("micrometer", ObservationExecChainHandler(observationRegistry))
         .build()
 
-    private val request = HttpGet(Constants.JokeUrl)
+    private val request = HttpGet(Constants.JokeApiHost).apply {
+        path = Constants.JokeApiPath
+    }
 
     override fun getJoke(): Joke? =
         client.execute(request) { response ->
@@ -33,5 +35,11 @@ class ApacheHttpClient5JokeRepository(
                 JacksonObjectMapper.deserializeJoke(it)
             }
         }
+
+    override fun callNotExistingUrl() {
+        client.execute(HttpGet(Constants.NotExistingUrl)) { _ ->
+
+        }
+    }
 
 }

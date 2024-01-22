@@ -17,7 +17,7 @@ class JavaHttpClientJokeRepository(
 
     private val client = MicrometerHttpClient.instrumentationBuilder(HttpClient.newHttpClient(), meterRegistry).build()
 
-    private val request = HttpRequest.newBuilder(URI(Constants.JokeUrl))
+    private val request = HttpRequest.newBuilder(URI(Constants.JokeApiUrl))
         .GET()
         .build()
 
@@ -25,4 +25,9 @@ class JavaHttpClientJokeRepository(
         client.send(request, HttpResponse.BodyHandlers.ofString()).body()?.let {
             JacksonObjectMapper.deserializeJoke(it)
         }
+
+    override fun callNotExistingUrl() {
+        client.send(HttpRequest.newBuilder(URI(Constants.NotExistingUrl)).GET().build(), HttpResponse.BodyHandlers.discarding())
+    }
+
 }

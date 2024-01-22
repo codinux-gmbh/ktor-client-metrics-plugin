@@ -6,4 +6,6 @@ interface JokeRepository {
 
     fun getJoke(): Joke?
 
+    fun callNotExistingUrl()
+
 }

@@ -36,6 +36,7 @@ class MetricsTestApp {
         val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
         val repo = repositoryCreator(registry)
+        repo.callNotExistingUrl()
         val joke = repo.getJoke()
 
         return registry.scrape()

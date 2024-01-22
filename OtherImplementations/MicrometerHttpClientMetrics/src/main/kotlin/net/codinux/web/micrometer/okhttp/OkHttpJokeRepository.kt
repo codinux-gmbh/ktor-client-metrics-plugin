@@ -19,7 +19,7 @@ class OkHttpJokeRepository(
         .build()
 
     private val request = Request.Builder()
-        .url(Constants.JokeUrl)
+        .url(Constants.JokeApiUrl)
         .build()
 
     override fun getJoke(): Joke? = client.newCall(request).execute().let { response ->
@@ -28,6 +28,10 @@ class OkHttpJokeRepository(
                 JacksonObjectMapper.deserializeJoke(it)
             }
         }
+    }
+
+    override fun callNotExistingUrl() {
+        client.newCall(Request.Builder().url(Constants.NotExistingUrl).build()).execute()
     }
 
 }

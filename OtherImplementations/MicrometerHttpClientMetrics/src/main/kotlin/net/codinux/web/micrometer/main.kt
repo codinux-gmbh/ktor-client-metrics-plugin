@@ -1,8 +1,10 @@
 package net.codinux.web.micrometer
 
+import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import net.codinux.web.micrometer.apachehttpclient5.ApacheHttpClient5JokeRepository
+import net.codinux.web.micrometer.common.JokeRepository
 import net.codinux.web.micrometer.javahttpclient.JavaHttpClientJokeRepository
 import net.codinux.web.micrometer.okhttp.OkHttpJokeRepository
 
@@ -21,28 +23,19 @@ fun main() {
 
 class MetricsTestApp {
 
-    fun getOkHttpMetrics(): String {
+    fun getOkHttpMetrics() =
+        getMetricsForHttpClient { registry -> OkHttpJokeRepository(registry) }
+
+    fun getJavaHttpClientMetrics() =
+        getMetricsForHttpClient { registry -> JavaHttpClientJokeRepository(registry) }
+
+    fun getApacheHttpClient5Metrics() =
+        getMetricsForHttpClient { registry -> ApacheHttpClient5JokeRepository(registry) }
+
+    private fun getMetricsForHttpClient(repositoryCreator: (MeterRegistry) -> JokeRepository): String {
         val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
-        val repo = OkHttpJokeRepository(registry)
-        val joke = repo.getJoke()
-
-        return registry.scrape()
-    }
-
-    fun getJavaHttpClientMetrics(): String {
-        val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
-
-        val repo = JavaHttpClientJokeRepository(registry)
-        val joke = repo.getJoke()
-
-        return registry.scrape()
-    }
-
-    fun getApacheHttpClient5Metrics(): String {
-        val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
-
-        val repo = ApacheHttpClient5JokeRepository(registry)
+        val repo = repositoryCreator(registry)
         val joke = repo.getJoke()
 
         return registry.scrape()

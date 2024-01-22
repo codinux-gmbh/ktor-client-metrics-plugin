@@ -19,5 +19,6 @@ dependencies {
 	implementation("io.micrometer:micrometer-registry-prometheus:$micrometerVersion")
 
 	implementation("com.squareup.okhttp3:okhttp:4.12.0")
+	implementation("org.apache.httpcomponents.client5:httpclient5:5.3")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
 }

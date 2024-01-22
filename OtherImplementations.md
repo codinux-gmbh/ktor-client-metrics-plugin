@@ -62,3 +62,22 @@ http_client_requests_seconds_sum{method="GET",outcome="SUCCESS",status="200",uri
 # TYPE http_client_requests_seconds_max gauge
 http_client_requests_seconds_max{method="GET",outcome="SUCCESS",status="200",uri="UNKNOWN",} 0.25779498
 ```
+
+### Apache HttpClient 5
+
+```text
+# HELP httpcomponents_httpclient_request_active_seconds_max  
+# TYPE httpcomponents_httpclient_request_active_seconds_max gauge
+httpcomponents_httpclient_request_active_seconds_max{exception="none",method="GET",outcome="UNKNOWN",status="CLIENT_ERROR",target_host="UNKNOWN",target_port="UNKNOWN",target_scheme="UNKNOWN",uri="UNKNOWN",} 0.0
+# HELP httpcomponents_httpclient_request_active_seconds  
+# TYPE httpcomponents_httpclient_request_active_seconds summary
+httpcomponents_httpclient_request_active_seconds_active_count{exception="none",method="GET",outcome="UNKNOWN",status="CLIENT_ERROR",target_host="UNKNOWN",target_port="UNKNOWN",target_scheme="UNKNOWN",uri="UNKNOWN",} 0.0
+httpcomponents_httpclient_request_active_seconds_duration_sum{exception="none",method="GET",outcome="UNKNOWN",status="CLIENT_ERROR",target_host="UNKNOWN",target_port="UNKNOWN",target_scheme="UNKNOWN",uri="UNKNOWN",} 0.0
+# HELP httpcomponents_httpclient_request_seconds_max  
+# TYPE httpcomponents_httpclient_request_seconds_max gauge
+httpcomponents_httpclient_request_seconds_max{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",target_host="v2.jokeapi.dev",target_port="443",target_scheme="https",uri="UNKNOWN",} 0.047167555
+# HELP httpcomponents_httpclient_request_seconds  
+# TYPE httpcomponents_httpclient_request_seconds summary
+httpcomponents_httpclient_request_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",target_host="v2.jokeapi.dev",target_port="443",target_scheme="https",uri="UNKNOWN",} 1.0
+httpcomponents_httpclient_request_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",target_host="v2.jokeapi.dev",target_port="443",target_scheme="https",uri="UNKNOWN",} 0.047167555
+```

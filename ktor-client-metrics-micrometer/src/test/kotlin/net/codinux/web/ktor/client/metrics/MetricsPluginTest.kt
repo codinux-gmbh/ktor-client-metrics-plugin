@@ -160,10 +160,10 @@ class MetricsPluginTest {
         val underTest = HttpClient(engine) {
             install(Metrics) {
                 this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
-                this.configureTags = { standardTags, method, url, status, attributes, throwable ->
-                    standardTags["uri"] = url.encodedPathAndQuery
+                this.configureTags = { standardTags, response ->
+                    standardTags["uri"] = response.url.encodedPathAndQuery
                     standardTags.remove("exception")
-                    standardTags["error-message"] = throwable?.message ?: "none"
+                    standardTags["error-message"] = response.exception?.message ?: "none"
                 }
             }
         }

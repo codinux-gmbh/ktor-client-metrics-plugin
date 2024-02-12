@@ -23,8 +23,8 @@ class MetricsPluginTest {
         }
 
         val underTest = HttpClient(engine) {
-            install(Metrics) {
-                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
+            install(MicrometerMetrics) {
+                this.meterRegistry = prometheusRegistry
             }
         }
 
@@ -49,8 +49,8 @@ class MetricsPluginTest {
         }
 
         val underTest = HttpClient(engine) {
-            install(Metrics) {
-                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
+            install(MicrometerMetrics) {
+                this.meterRegistry = prometheusRegistry
             }
         }
 
@@ -75,8 +75,8 @@ class MetricsPluginTest {
         }
 
         val underTest = HttpClient(engine) {
-            install(Metrics) {
-                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
+            install(MicrometerMetrics) {
+                this.meterRegistry = prometheusRegistry
             }
         }
 
@@ -102,8 +102,8 @@ class MetricsPluginTest {
         }
 
         val underTest = HttpClient(engine) {
-            install(Metrics) {
-                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
+            install(MicrometerMetrics) {
+                this.meterRegistry = prometheusRegistry
                 this.additionalTags = mapOf(
                     "component" to "Our important service"
                 )
@@ -131,8 +131,8 @@ class MetricsPluginTest {
         }
 
         val underTest = HttpClient(engine) {
-            install(Metrics) {
-                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
+            install(MicrometerMetrics) {
+                this.meterRegistry = prometheusRegistry
                 this.getUriTag = { url -> url.encodedPathAndQuery }
             }
         }
@@ -158,8 +158,8 @@ class MetricsPluginTest {
         }
 
         val underTest = HttpClient(engine) {
-            install(Metrics) {
-                this.meterRegistry = MicrometerMeterRegistry(prometheusRegistry)
+            install(MicrometerMetrics) {
+                this.meterRegistry = prometheusRegistry
                 this.configureTags = { standardTags, response ->
                     standardTags["uri"] = response.url.encodedPathAndQuery
                     standardTags.remove("exception")

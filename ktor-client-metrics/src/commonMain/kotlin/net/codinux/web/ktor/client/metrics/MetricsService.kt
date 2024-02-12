@@ -8,12 +8,11 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.util.*
 import io.ktor.util.date.*
+import net.codinux.web.ktor.client.metrics.MetricsPluginConfigBase.AppliedConfig
 
 class MetricsService(
-    pluginConfig: MetricsPluginConfig
+    private val config: AppliedConfig
 ) {
-
-    private val config = pluginConfig.applyConfig()
 
     private val contextAttributeKey: AttributeKey<Any> = AttributeKey("MetricsContext")
 
@@ -35,14 +34,14 @@ class MetricsService(
         }
     }
 
-    private fun stopTimerWithSuccessStatus(config: MetricsPluginConfig.AppliedConfig, response: HttpResponse) {
+    private fun stopTimerWithSuccessStatus(config: AppliedConfig, response: HttpResponse) {
         val request = response.request
         val responseData = ResponseData(request.method, request.url, response.status.value, request.attributes, response.requestTime, response.responseTime)
 
         stopTimer(config, responseData)
     }
 
-    private fun stopTimerWithErrorStatus(config: MetricsPluginConfig.AppliedConfig, request: HttpRequestBuilder, requestTime: GMTDate, cause: Throwable) {
+    private fun stopTimerWithErrorStatus(config: AppliedConfig, request: HttpRequestBuilder, requestTime: GMTDate, cause: Throwable) {
         val errorCode = when (cause) {
             is HttpRequestTimeoutException,
             is ConnectTimeoutException,
@@ -56,7 +55,7 @@ class MetricsService(
         stopTimer(config, responseData)
     }
 
-    private fun stopTimer(config: MetricsPluginConfig.AppliedConfig, responseData: ResponseData) {
+    private fun stopTimer(config: AppliedConfig, responseData: ResponseData) {
         val url = responseData.url
 
         val standardTags = mutableMapOf(

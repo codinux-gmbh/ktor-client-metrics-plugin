@@ -22,8 +22,8 @@ class Examples {
     @Test
     fun showConfiguration() {
         val client = HttpClient(engine) {
-            install(Metrics) {
-                this.meterRegistry = MicrometerMeterRegistry(micrometerRegistry)
+            install(MicrometerMetrics) {
+                this.meterRegistry = micrometerRegistry
 
                 // specify additional tags that should get added to all metrics
                 this.additionalTags = mapOf(

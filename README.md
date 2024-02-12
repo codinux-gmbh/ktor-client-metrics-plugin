@@ -36,8 +36,8 @@ Maven does not support automatic platform resolution as Gradle does, therefore t
 val micrometerRegistry = ... // get io.micrometer.core.instrument.MeterRegistry, e.g. via dependency injection in Spring or Quarkus
 
 val underTest = HttpClient(/*Set engine*/) {
-    install(Metrics) {
-        this.meterRegistry = MicrometerMeterRegistry(micrometerRegistry)
+    install(MicrometerMetrics) {
+        this.meterRegistry = micrometerRegistry
     }
 }
 ```
@@ -62,8 +62,8 @@ You can configure additional tags, adjust the uri tag or configure the tags free
 
 ```kotlin
 val client = HttpClient(engine) {
-    install(Metrics) {
-        this.meterRegistry = MicrometerMeterRegistry(micrometerRegistry)
+    install(MicrometerMetrics) {
+        this.meterRegistry = micrometerRegistry
 
         // specify additional tags that should get added to all metrics
         this.additionalTags = mapOf(

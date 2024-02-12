@@ -1,6 +1,8 @@
 package net.codinux.web.ktor.client.metrics
 
-class MetricsPluginConfig : MetricsPluginConfigBase() {
+import io.micrometer.core.instrument.MeterRegistry
+
+class MicrometerMetricsPluginConfig : MetricsPluginConfigBase() {
 
     lateinit var meterRegistry: MeterRegistry
 
@@ -9,6 +11,7 @@ class MetricsPluginConfig : MetricsPluginConfigBase() {
             throw IllegalArgumentException("meterRegistry must be set")
         }
 
-        return AppliedConfig(meterRegistry, additionalTags, getUriTag, configureTags)
+        return AppliedConfig(MicrometerMeterRegistry(meterRegistry), additionalTags, getUriTag, configureTags)
     }
+
 }

@@ -46,3 +46,8 @@ kotlin {
         }
     }
 }
+
+
+ext["customArtifactId"] = "ktor-client-metrics"
+
+apply(from = "../gradle/scripts/publish-codinux.gradle.kts")

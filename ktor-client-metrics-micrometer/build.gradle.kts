@@ -10,11 +10,11 @@ kotlin {
 
 
 dependencies {
-    implementation(project(":ktor-client-metrics"))
+    api(project(":ktor-client-metrics"))
 
     implementation(libs.ktor.client.core)
 
-    implementation(libs.micrometer.core)
+    api(libs.micrometer.core)
 
 
     testImplementation(libs.kotlin.test)
@@ -30,3 +30,8 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+
+ext["customArtifactId"] = "ktor-client-metrics-micrometer"
+
+apply(from = "../gradle/scripts/publish-codinux.gradle.kts")
